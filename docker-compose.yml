@@ -1,0 +1,18 @@
+services:
+  go-api:
+    build:
+      context: ./go-api
+    container_name: go-api
+    ports:
+      - "8081:8081"
+
+  node-api:
+    build:
+      context: ./node-api
+    container_name: node-api
+    ports:
+      - "4000:4000"
+    depends_on:
+      - go-api
+    environment:
+      GO_API_URL: http://go-api:8081

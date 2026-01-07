@@ -1,0 +1,33 @@
+service: reto-talent-house
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-jetpack
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  timeout: 20
+  region: us-east-1
+  # Variables de entorno que utiliza la API
+  environment:
+    API_APPOINTMENT_URL:
+      Fn::Join:
+        - ''
+        - - 'https://'
+          - Ref: HttpApi
+          - '.execute-api.${self:provider.region}.amazonaws.com'
+
+
+functions:
+  appointment:
+    handler: src/aws-infrastructure/lambda-handlers/createAppointment.handler
+    environment:
+      SNS_TOPIC_ARN: !Ref AppointmentSNS
+    events:
+      - httpApi:
+          method: any
+          path: /{proxy+}
