@@ -1,4 +1,3 @@
-# Permisos para ECR (se comparten para ambos servicios)
 resource "aws_iam_role" "apprunner_ecr_role" {
   name = "AppRunnerECRAccessRoleAll"
   assume_role_policy = jsonencode({
@@ -16,11 +15,8 @@ resource "aws_iam_role_policy_attachment" "apprunner_ecr_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
 }
 
-# ===============================
-# Go API (ECR) - Puerto 8081
-# ===============================
 resource "aws_apprunner_service" "go_api" {
-  service_name = "go-api-final"
+  service_name = var.go_service_name # <--- Usando variable
 
   source_configuration {
     image_repository {
@@ -36,11 +32,8 @@ resource "aws_apprunner_service" "go_api" {
   }
 }
 
-# ===============================
-# Node API (ECR) - Puerto 4000
-# ===============================
 resource "aws_apprunner_service" "node_api" {
-  service_name = "node-api-final"
+  service_name = var.node_service_name # <--- Usando variable
 
   source_configuration {
     image_repository {
@@ -48,9 +41,11 @@ resource "aws_apprunner_service" "node_api" {
       image_repository_type = "ECR"
       image_configuration {
         port = "4000"
-        # Inyectamos la URL de Go aquí también
         runtime_environment_variables = {
           GO_API_URL = "https://${aws_apprunner_service.go_api.service_url}"
+          JWT_SECRET = var.jwt_secret_key
+          APP_USER     = var.app_user
+          APP_PASSWORD = var.app_password
         }
       }
     }

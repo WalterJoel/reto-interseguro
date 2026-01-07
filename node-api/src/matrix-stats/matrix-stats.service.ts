@@ -9,10 +9,10 @@ interface GoApiResponse {
 
 @Injectable()
 export class MatrixStatsService {
-  private readonly GO_API_URL = process.env.GO_API_URL || 'http://go-api:8081';
+  private readonly GO_API_URL = process.env.GO_API_URL || 'http://localhost:8081';
 
-  
   async calculateStats(dto: MatrixStatsRequestDto) {
+    console.log(this.GO_API_URL, ' GO URL ');
     try {
       const goResponse = await axios.post<GoApiResponse>(
         `${this.GO_API_URL}/matrix-qr`,
