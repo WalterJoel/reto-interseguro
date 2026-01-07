@@ -15,3 +15,14 @@ variable "jwt_secret_key" {
   type        = string
   sensitive   = true
 }
+
+variable "app_user" {
+  description = "Usuario para la aplicación"
+  type        = string
+}
+
+variable "app_password" {
+  description = "Password para la aplicación"
+  type        = string
+  sensitive   = true  
+}

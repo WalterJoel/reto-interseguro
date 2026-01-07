@@ -40,3 +40,9 @@ lerna-debug.log*
 # Binaries
 *.exe
 terraform-provider-*.exe
+
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+terraform.tfvars    
