@@ -4,6 +4,11 @@ import { MatrixStatsService } from './matrix-stats.service';
 import { MatrixStatsRequestDto } from './dto/matrix-stats.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LoginDto } from './dto/login.dto';
+import {
+  DocLogin,
+  DocCalculateStats
+} from './docs/swagger.docs';
+
 
 @Controller('matrix-stats')
 export class MatrixStatsController {
@@ -13,6 +18,7 @@ export class MatrixStatsController {
   ) {}
 
 @Post('login')
+@DocLogin()
 async login(@Body() loginDto: LoginDto) {
   const { username, password } = loginDto;
   console.log(process.env.APP_USER, ' USER');
@@ -26,6 +32,7 @@ async login(@Body() loginDto: LoginDto) {
 }
 
   @Post()
+  @DocCalculateStats()
   @UseGuards(JwtAuthGuard)  
   calculateStats(@Body() dto: MatrixStatsRequestDto) {
     return this.matrixStatsService.calculateStats(dto);

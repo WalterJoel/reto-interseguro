@@ -2,9 +2,8 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 import { MatrixStatsRequestDto } from './dto/matrix-stats.dto';
 
-
 interface GoApiResponse {
-  matrices: Record<string, number[][]>; // nombre de cada matriz → matriz de números
+  matrices: Record<string, { q: number[][]; r: number[][] }>;
 }
 
 @Injectable()
@@ -12,38 +11,29 @@ export class MatrixStatsService {
   private readonly GO_API_URL = process.env.GO_API_URL || 'http://localhost:8081';
 
   async calculateStats(dto: MatrixStatsRequestDto) {
-    console.log(this.GO_API_URL, ' GO URL ');
     try {
+      const payloadForGo = {
+        matrices: {
+          matrix1: dto.matrix
+        }
+      };
+
       const goResponse = await axios.post<GoApiResponse>(
         `${this.GO_API_URL}/matrix-qr`,
-        dto,
+        payloadForGo,
       );
 
-      const matricesQR = goResponse.data.matrices; 
-      console.log(matricesQR, ' RPTA FROM GO');
-      //Mock momentaneo
-    //   const matricesQR = {
-    //   matrix1: [
-    //     [1, 0, 0],
-    //     [0, 2, 0],
-    //     [0, 0, 3],
-    //   ],
-    //   matrix2: [
-    //     [4, 0],
-    //     [0, 5],
-    //   ],
-    // };
+      const qrResult = goResponse.data.matrices.matrix1;
+      const { q, r } = qrResult;
 
-      
       let max = -Infinity;
       let min = Infinity;
       let sum = 0;
       let count = 0;
-      let hasDiagonalMatrix = false;
 
-      for (const matrix of Object.values(matricesQR)) {
-        if (this.isDiagonalMatrix(matrix)) hasDiagonalMatrix = true;
+      const hasDiagonalMatrix = this.isDiagonalMatrix(r);
 
+      [q, r].forEach(matrix => {
         for (const row of matrix) {
           for (const value of row) {
             max = Math.max(max, value);
@@ -52,14 +42,17 @@ export class MatrixStatsService {
             count++;
           }
         }
-      }
+      });
 
       return {
-        max,
-        min,
-        sum,
-        average: count ? sum / count : 0,
-        hasDiagonalMatrix,
+        qr_decomposition: { q, r },
+        statistics: {
+          max,
+          min,
+          sum,
+          average: count ? sum / count : 0,
+          hasDiagonalMatrix,
+        },
       };
 
     } catch (error) {
@@ -73,11 +66,13 @@ export class MatrixStatsService {
   private isDiagonalMatrix(matrix: number[][]): boolean {
     const rows = matrix.length;
     const cols = matrix[0]?.length ?? 0;
-    if (rows !== cols) return false;
+    if (rows !== cols || rows === 0) return false;
 
-    for (let i = 0; i < rows; i++)
-      for (let j = 0; j < cols; j++)
-        if (i !== j && matrix[i][j] !== 0) return false;
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (i !== j && Math.abs(matrix[i][j]) > 1e-10) return false;
+      }
+    }
 
     return true;
   }

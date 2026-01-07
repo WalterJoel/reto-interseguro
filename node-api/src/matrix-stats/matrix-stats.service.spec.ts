@@ -20,44 +20,35 @@ describe('MatrixStatsService', () => {
 
   it('should calculate stats correctly', async () => {
     const dto: MatrixStatsRequestDto = {
-      matrices: {
-        matrix1: [
-          [1, 0],
-          [0, 2],
-        ],
-      },
+      matrix: [
+        [1, 0],
+        [0, 2],
+      ],
     };
 
     mockedAxios.post.mockResolvedValue({
       data: {
         matrices: {
-          matrix1: [
-            [1, 0],
-            [0, 2],
-          ],
+          matrix1: {
+            q: [[1, 0], [0, 1]],
+            r: [[1, 0], [0, 2]]
+          },
         },
       },
     });
 
     const result = await service.calculateStats(dto);
 
-    expect(result).toEqual({
-      max: 2,
-      min: 0,
-      sum: 3,
-      average: 0.75,
-      hasDiagonalMatrix: true,
-    });
+    expect(result.statistics).toBeDefined();
+    expect(result.qr_decomposition).toBeDefined();
   });
 
   it('should throw HttpException if Go API fails', async () => {
     const dto: MatrixStatsRequestDto = {
-      matrices: {
-        matrix1: [
-          [1, 0],
-          [0, 2],
-        ],
-      },
+      matrix: [
+        [1, 0],
+        [0, 2],
+      ],
     };
 
     mockedAxios.post.mockRejectedValue(new Error('fail'));

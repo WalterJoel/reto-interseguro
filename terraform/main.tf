@@ -26,7 +26,7 @@ resource "aws_apprunner_service" "go_api" {
         port = "8081"
       }
     }
-    authentication_configuration {
+    authentication_configuration {  
       access_role_arn = aws_iam_role.apprunner_ecr_role.arn
     }
   }
@@ -37,7 +37,7 @@ resource "aws_apprunner_service" "node_api" {
 
   source_configuration {
     image_repository {
-      image_identifier      = "180294174325.dkr.ecr.us-east-1.amazonaws.com/node-api-repo:latest"
+      image_identifier      = "180294174325.dkr.ecr.us-east-1.amazonaws.com/node-api-repo:latest" 
       image_repository_type = "ECR"
       image_configuration {
         port = "4000"
